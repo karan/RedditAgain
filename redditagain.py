@@ -17,14 +17,14 @@ if __name__ == '__main__':
     old_user = r.user # get a praw.objects.Redditor object
     
     print '>> Deleting all comments...'
-    for com in r.get_comments(limit=None):
+    for com in old_user.get_comments(limit=None):
         com.delete()
         sys.stdout.write('. ')
         sys.stdout.flush()
     
     
     print '>> Deleting all submissions...'
-    for sub in r.get_submitted(limit=None):
+    for sub in old_user.get_submitted(limit=None):
         sub.delete()
         sys.stdout.write('. ')
         sys.stdout.flush()
