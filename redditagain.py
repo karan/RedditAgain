@@ -6,49 +6,51 @@ import praw
 
 USER_AGENT = 'RedditAgain by @karangoeluw // github: thekarangoel'
 
+def print_dot():
+    sys.stdout.write('. ')
+    sys.stdout.flush()
+    print
+
 if __name__ == '__main__':
     
     print '>> Login to OLD account..'
     
-    r = praw.Reddit(USER_AGENT)
-    r.login()
+    old_r = praw.Reddit(USER_AGENT) # praw.Reddit
+    old_r.login()
     
     print '\t>>Login successful..'
-    old_user = r.user # get a praw.objects.Redditor object
+    old_user = old_r.user # get a praw.objects.LoggedInRedditor object
     
     print '>> Deleting all comments...'
     for com in old_user.get_comments(limit=None):
         com.delete()
-        sys.stdout.write('. ')
-        sys.stdout.flush()
-    
+        print_dot()
     
     print '>> Deleting all submissions...'
     for sub in old_user.get_submitted(limit=None):
         sub.delete()
-        sys.stdout.write('. ')
-        sys.stdout.flush()
+        print_dot()
     
     print '>> Preparing to migrate subscriptions.'
     
-    subs = r.get_my_subreddits(limit=None)
+    subs = old_r.get_my_subreddits(limit=None)
     
-    r2 = praw.Reddit(USER_AGENT)
+    new_r = praw.Reddit(USER_AGENT)
     new_username = raw_input('>> Enter username of new account to be registered.')
     new_pass = raw_input('\t>> Enter preferred password for %s' % new_username)
     
-    r2.create_redditor(new_username, new_pass) # create the new account
+    new_r.create_redditor(new_username, new_pass) # create the new account
     
-    r2.login(new_username, new_pass)
+    new_r.login(new_username, new_pass)
     
-    new_user = r2.user # get a praw.objects.Redditor object
+    new_user = new_r.user # get a praw.objects.LoggedInRedditor object
     print '\t>>Login successful..'
     
     print '>> Migrating subscriptions...'
     for sub in subs:
-        r2.get_subreddit(sub.display_name).subscribe()
-        r.get_subreddit(sub.display_name).unsubscribe()
-        sys.stdout.write('. ')
-        sys.stdout.flush()
+        new_r.get_subreddit(sub.display_name).subscribe()
+        old_r.get_subreddit(sub.display_name).unsubscribe()
+        print_dot()
     
-    print '>> Done migrating. Deleting old user.'
+    print '>> Done migrating.'
+    print '>> Go to https://ssl.reddit.com/prefs/delete/ to delete your old account.'
