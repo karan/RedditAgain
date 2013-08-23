@@ -17,3 +17,9 @@ Usage
 =======
 
     $ python redditagain.py
+
+
+[Donate](https://www.gittip.com/Karan%20Goel/)
+=============
+
+If you love and use *RedditAgain*, please consider [donating via gittip](https://www.gittip.com/Karan%20Goel/). Any support is appreciated!
