@@ -1,7 +1,7 @@
 RedditAgain
 ===========
 
-Migrate an old Reddit account to a new one. (Clears submissions, copy subscriptions)
+Migrate an old Reddit account to a new one.
 
 Features
 ===========
@@ -9,6 +9,7 @@ Features
 * Easy to use
 * No change in source code required
 * Fast
+* Saves all comments and submissions in csv files.
 * Deletes all comments and submissions
 * Creates a new reddit account
 * Copies subreddit subscriptions from old account to new account
