@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 import sys
+import time
+import csv
 
 import praw
 
@@ -10,7 +12,6 @@ def print_dot():
     """Prints out a dot on the same line when called"""
     sys.stdout.write('. ')
     sys.stdout.flush()
-    print
 
 def main():
     print '>> Login to OLD account..'
@@ -21,15 +22,33 @@ def main():
     print '\t>>Login successful..'
     old_user = old_r.user # get a praw.objects.LoggedInRedditor object
     
-    print '>> Deleting all comments...'
+    print '>> Saving and Deleting all comments...'
+    comment_file = csv.writer(open('%s_comments.csv' % old_user.name, 'wb'))
+    comment_file.writerow(['Comment', "Posted on", "Thread"]) # header
+    
     for com in old_user.get_comments(limit=None):
+        comment_file.writerow([com.body,
+                               time.strftime('%Y-%m-%d %H:%M:%S',
+                                             time.localtime(com.created)),
+                               com.submission.permalink])
         com.delete()
         print_dot()
+    comment_file.close()
+    print '\n\t>> Saved to {0}_comments.csv'.format(old_user.name)
     
-    print '>> Deleting all submissions...'
+    print '>> Saving and Deleting all submissions...'
+    submission_file = csv.writer(open('%s_submissions.csv' % old_user.name, 'wb'))
+    submission_file.writerow(['Title', "Body/Link", "Created", "Karma"]) # header
+    
     for sub in old_user.get_submitted(limit=None):
+        submission_file.writerow([sub.title,
+                                  sub.selftext if sub.is_self else sub.url,
+                                  time.strftime('%Y-%m-%d %H:%M:%S',
+                                                time.localtime(sub.created)),
+                                  sub.score])
         sub.delete()
         print_dot()
+    print '\n\t>> Saved to {0}_submissions.csv'.format(old_user.name)
     
     print '>> Preparing to migrate subscriptions.'
     
