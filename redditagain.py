@@ -7,12 +7,12 @@ import praw
 USER_AGENT = 'RedditAgain by @karangoeluw // github: thekarangoel'
 
 def print_dot():
+    """Prints out a dot on the same line when called"""
     sys.stdout.write('. ')
     sys.stdout.flush()
     print
 
-if __name__ == '__main__':
-    
+def main():
     print '>> Login to OLD account..'
     
     old_r = praw.Reddit(USER_AGENT) # praw.Reddit
@@ -54,3 +54,7 @@ if __name__ == '__main__':
     
     print '>> Done migrating.'
     print '>> Go to https://ssl.reddit.com/prefs/delete/ to delete your old account.'
+
+
+if __name__ == '__main__':
+    main()
