@@ -3,66 +3,119 @@
 import sys
 import time
 import csv
+import os
+import getpass
 
 import praw
 
 USER_AGENT = 'RedditAgain by @karangoeluw // github: thekarangoel'
+
 
 def print_dot():
     """Prints out a dot on the same line when called"""
     sys.stdout.write('. ')
     sys.stdout.flush()
 
-def main():
+
+def csv_file(fp, header):
+    """Create or append a CSV file."""
+    if os.path.exists(fp):
+        f = open(fp, 'ab')
+        writer = csv.writer(f)
+    else:
+        f = open(fp, 'wb')
+        writer = csv.writer(f)
+        writer.writerow(header)
+
+    return f, writer
+
+
+def format_time(created):
+    return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(created))
+
+
+if __name__ == '__main__':
     print '>> Login to OLD account..'
 
-    old_r = praw.Reddit(USER_AGENT) # praw.Reddit
+    old_r = praw.Reddit(USER_AGENT)  # praw.Reddit
     old_r.login()
 
     print '\t>>Login successful..'
-    old_user = old_r.user # get a praw.objects.LoggedInRedditor object
+    old_user = old_r.user  # get a praw.objects.LoggedInRedditor object
 
     print '>> Saving and Deleting all comments...'
-    comment_file = csv.writer(open('%s_comments.csv' % old_user.name, 'wb'))
-    comment_file.writerow(['Comment', "Posted on", "Thread"]) # header
 
-    for com in old_user.get_comments(limit=None):
-        comment_file.writerow([com.body,
-                               time.strftime('%Y-%m-%d %H:%M:%S',
-                                             time.localtime(com.created)),
-                               com.submission.permalink])
-        com.delete()
-        print_dot()
-    comment_file.close()
+    comment_file, comment_csv = csv_file(
+        '{}_comments.csv'.format(old_user.name),
+        ['Comment', "Posted on", "Thread"])
+
+    with comment_file:
+        removed = 1
+        while removed > 0:  # keep going until everything is gone
+            removed = 0
+            for com in old_user.get_comments(limit=None):
+                link = com.submission.permalink.encode('utf-8')
+                body = com.body.encode('utf-8')
+                row = [body, format_time(com.created), link]
+                try:
+                    comment_csv.writerow(row)
+                    com.delete()
+                    removed += 1
+                    print_dot()
+                except Exception as e:
+                    print 'Failed to store', link
+                    print e
     print '\n\t>> Saved to {0}_comments.csv'.format(old_user.name)
 
     print '>> Saving and Deleting all submissions...'
-    submission_file = csv.writer(open('%s_submissions.csv' % old_user.name, 'wb'))
-    submission_file.writerow(['Title', "Body/Link", "Created", "Karma"]) # header
+    submission_header = ['Title', "Body/Link", "Created", "Karma"]
+    submission_file, submission_csv = csv_file(
+        '{}_submissions.csv'.format(old_user.name),
+        submission_header)
 
-    for sub in old_user.get_submitted(limit=None):
-        submission_file.writerow([sub.title,
-                                  sub.selftext if sub.is_self else sub.url,
-                                  time.strftime('%Y-%m-%d %H:%M:%S',
-                                                time.localtime(sub.created)),
-                                  sub.score])
-        sub.delete()
-        print_dot()
+    with submission_file:
+        removed = 1
+        while removed > 0:  # keep going until everything is gone
+            removed = 0
+            for sub in old_user.get_submitted(limit=None):
+                if sub.is_self:
+                    submission = sub.selftext.encode('utf-8')
+                else:
+                    submission = sub.url.encode('utf-8')
+                title = sub.title.encode('utf-8')
+                row = [title, submission, format_time(sub.created), sub.score]
+                try:
+                    submission_csv.writerow(row)
+                    sub.delete()
+                    removed += 1
+                    print_dot()
+                except Exception as e:
+                    print 'Failed to store', submission
+                    print e
     print '\n\t>> Saved to {0}_submissions.csv'.format(old_user.name)
 
     print '>> Preparing to migrate subscriptions.'
-
     subs = old_r.get_my_subreddits(limit=None)
 
     new_r = praw.Reddit(USER_AGENT)
-    new_username = raw_input('>> Enter username of new account to be registered.')
-    new_pass = raw_input('\t>> Enter preferred password for %s' % new_username)
+    new_username = raw_input('>> Enter username of new account: ')
 
-    new_r.create_redditor(new_username, new_pass) # create the new account
+    while True:
+        new_pass = getpass.getpass(
+            '\t>> Enter password for `{}`: '.format(new_username))
+        new_pass2 = getpass.getpass('\t>> Retype password to confirm: ')
+        if new_pass != new_pass2:
+            print 'Passwords do not match!'
+        else:
+            break
+
+    # create the new account, if available
+    if new_r.is_username_available(new_username):
+        new_r.create_redditor(new_username, new_pass)
 
     new_r.login(new_username, new_pass)
 
-    new_user = new_r.user # get a praw.objects.LoggedInRedditor object
+    new_user = new_r.user  # get a praw.objects.LoggedInRedditor object
     print '\t>>Login successful..'
 
     print '>> Migrating subscriptions...'
@@ -70,10 +123,7 @@ def main():
         new_r.get_subreddit(sub.display_name).subscribe()
         old_r.get_subreddit(sub.display_name).unsubscribe()
         print_dot()
+    print '\n\t>> Done migrating.'
 
-    print '>> Done migrating.'
-    print '>> Go to https://ssl.reddit.com/prefs/delete/ to delete your old account.'
-
-
-if __name__ == '__main__':
-    main()
+    print '>> Go to https://ssl.reddit.com/prefs/delete/',
+    print 'to delete your old account.'
