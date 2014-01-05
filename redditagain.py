@@ -8,7 +8,7 @@ import getpass
 
 import praw
 
-USER_AGENT = 'RedditAgain by @karangoeluw // github: thekarangoel'
+USER_AGENT = 'RedditAgain by /u/karangoeluw // github: karan'
 
 
 def print_dot():
@@ -43,7 +43,7 @@ if __name__ == '__main__':
     print '\t>>Login successful..'
     old_user = old_r.user  # get a praw.objects.LoggedInRedditor object
 
-    print '>> Saving and Deleting all comments...'
+    print '>> Saving and editing all comments...'
 
     comment_file, comment_csv = csv_file(
         '{}_comments.csv'.format(old_user.name),
@@ -59,7 +59,7 @@ if __name__ == '__main__':
                 row = [body, format_time(com.created), link]
                 try:
                     comment_csv.writerow(row)
-                    com.delete()
+                    com.edit('.')
                     removed += 1
                     print_dot()
                 except Exception as e:
@@ -67,7 +67,7 @@ if __name__ == '__main__':
                     print e
     print '\n\t>> Saved to {0}_comments.csv'.format(old_user.name)
 
-    print '>> Saving and Deleting all submissions...'
+    print '>> Saving and editing all submissions...'
     submission_header = ['Title', "Body/Link", "Created", "Karma"]
     submission_file, submission_csv = csv_file(
         '{}_submissions.csv'.format(old_user.name),
@@ -86,7 +86,7 @@ if __name__ == '__main__':
                 row = [title, submission, format_time(sub.created), sub.score]
                 try:
                     submission_csv.writerow(row)
-                    sub.delete()
+                    sub.edit('.')
                     removed += 1
                     print_dot()
                 except Exception as e:
