@@ -20,7 +20,17 @@ Usage
     $ python redditagain.py
 
 
-[Donate](https://www.gittip.com/Karan%20Goel/)
+Donations
 =============
 
-If you love and use *RedditAgain*, please consider [donating via gittip](https://www.gittip.com/Karan%20Goel/). Any support is appreciated!
+If RedditAgain has helped you in any way, and you'd like to help the developer, please consider donating.
+
+**- BTC: [19dLDL4ax7xRmMiGDAbkizh6WA6Yei2zP5](http://i.imgur.com/bAQgKLN.png)**
+
+**- Flattr: [https://flattr.com/profile/thekarangoel](https://flattr.com/profile/thekarangoel)**
+
+
+Contribute
+========
+
+If you want to add any new features, or improve existing ones, feel free to send a pull request!
