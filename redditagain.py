@@ -34,8 +34,10 @@ def format_time(created):
 # Ask the user for a decision. 'y' and 'Y' will evaluate to True, anything else will equate to False.
 # A better implementation is welcome, it's just a quick-n-dirty slap-together job! -ChainsawPolice
 def y_or_n(decision):
-    if decision.lower=='y': return True
-    else:                   return False
+    if decision.lower() == 'y': 
+        return True
+    else:                   
+        return False
 
 
 if __name__ == '__main__':
